@@ -51,7 +51,7 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 // app.use(cors());
 app.use(express.json());
 app.use(cors({
-  origin: 'http://localhost:3000' // Adjust to your frontend's origin
+  origin: 'http://localhost:8081' // Adjust to your frontend's origin
 }));
 // Use admin routes
 app.use('/api/admin', adminRoutes);

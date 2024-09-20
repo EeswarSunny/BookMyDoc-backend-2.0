@@ -93,5 +93,7 @@ router.post('/login', authController.login);
  *         description: Unauthorized, user is not logged in
  */
 router.post('/logout', authController.logout);
+router.post('/verify-otp', authController.verifyOtp);
+
 
 module.exports = router;

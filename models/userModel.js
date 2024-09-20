@@ -2,9 +2,13 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema({
-    username: { type: String, required: true, trim: true, unique: true },
+    email: { type: String, required: true, trim: true, unique: true },
+    fullName: { type: String, required: true, trim: true, unique: true },
     password: { type: String, required: true },
-    role: { type: String, enum: ['user', 'admin'], default: 'user' } // Added role field
+    otp: { type: String }, // Field to store OTP
+    otpExpires: { type: Date },
+    role: { type: String, enum: ['user', 'doctor','admin'], default: 'user' } ,// Added role field
+    isVerified: { type: Boolean, default: false },
 });
 
 // Hash password before saving

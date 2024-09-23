@@ -1,74 +1,76 @@
-// /server.js
 const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
-const adminRoutes = require('./routes/adminRoutes');
+const morgan = require('morgan');
+const rateLimit = require('express-rate-limit');
 const swaggerJsDoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
-
-// Load routes
-// const stateRoutes = require('./routes/stateRoutes');
-// const districtRoutes = require('./routes/districtRoutes');
-// const mandalRoutes = require('./routes/mandalRoutes');
-// const doctorRoutes = require('./routes/doctorRoutes');
-// const appointmentRoutes = require('./routes/appointmentRoutes');
-const authRoutes = require('./routes/authRoutes');
-const connectDB = require('./config/db');
-
+const connectDB = require('./config/mongo');
+const { swaggerOptions } = require('./config/swagger'); // Swagger options
+const routesV1 = require('./routes/v2'); // Modularized routes
+const routesV2 = require('./routes/v2'); // Modularized routes
 // Load environment variables
 dotenv.config();
 
 // Initialize app
 const app = express();
 
-// Swagger configuration options
-const swaggerOptions = {
-  swaggerDefinition: {
-    openapi: '3.0.0', // Use OpenAPI 3.0.0 spec
-    info: {
-      title: 'Healthcare API',
-      version: '1.0.0',
-      description: 'API for managing healthcare appointments',
-      contact: {
-        name: 'Support Team',
-        url: 'http://example.com',
-        email: 'support@example.com',
-      },
-    },
-    servers: [
-      {
-        url: 'http://localhost:5000',
-      },
-    ],
-  },
-  apis: ['./routes/*.js'], // Path to the files where APIs are defined
-};
+const {
+  PORT, MONGO_URI_LOCAL, EMAIL, PORT_FRONTEND         
+} = process.env;
+// Check required environment variables
+const requiredEnvVars = ['PORT', 'MONGO_URI_LOCAL','EMAIL', 'PORT_FRONTEND']; // Add other required variables
+requiredEnvVars.forEach(varName => {
+  if (!process.env[varName]) {
+    throw new Error(`Missing required environment variable: ${varName}`);
+  }
+});
+
+// Middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cors({
+  origin: `http://localhost:${PORT_FRONTEND}` 
+}));
+
+// Rate limiter configuration
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
+  message: "Too many requests from this IP, please try again later."
+});
+
+// Apply rate limiter to all API routes
+app.use('/api/', apiLimiter);
+
+// Connect to MongoDB
+connectDB();
+
 // Swagger docs setup
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
-// Middleware
-// app.use(cors());
-app.use(express.json());
-app.use(cors({
-  origin: 'http://localhost:8081' // Adjust to your frontend's origin
-}));
-// Use admin routes
-app.use('/api/admin', adminRoutes);
-// Connect to MongoDB
-connectDB();
-
-
 // Use routes
-// app.use('/api/states', stateRoutes);
-// app.use('/api/districts', districtRoutes);
-// app.use('/api/mandals', mandalRoutes);
-// app.use('/api/doctors', doctorRoutes);
-// app.use('/api/appointments', appointmentRoutes);
-app.use('/api/auth', authRoutes);
+app.use('/api/v1', routesV1);
+// app.use('/api/v2', routesV2);
+
+// Centralized error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack); // Log the error
+  res.status(err.status || 500).json({
+    success: false,
+    message: err.message || 'Internal Server Error',
+  });
+});
 
 // Start the server
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  server.close(() => {
+    console.log('Server closed');
+  });
 });

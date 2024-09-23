@@ -2,13 +2,13 @@ const User = require('../models/userModel');
 const jwt = require('jsonwebtoken');
 const bcryptjs = require('bcryptjs');
 const sendEmail = require('../utils/emailService');
-
+    
 // Register a new user
 exports.register = async (req, res) => {
     const { email, password , fullName , role } = req.body;
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // OTP valid for 10 minutes
-
+    // const encPassword =  await bcryptjs.hash(password, 10);
     try {
         const user = new User({ email, password , fullName , role, otp, otpExpires, isVerified: false });
         await user.save();
@@ -19,17 +19,6 @@ exports.register = async (req, res) => {
     }
 };
 
-// Register a new admin
-exports.registerAdmin = async (req, res) => {
-    const { username, password } = req.body;
-    try {
-        const admin = new User({ username, password, role: 'admin' });
-        await admin.save();
-        res.status(201).json({ message: 'Admin registered' });
-    } catch (err) {
-        res.status(400).json({ message: err.message });
-    }
-};
 
 exports.verifyOtp = async (req, res) => {
     const { email, otp } = req.body;

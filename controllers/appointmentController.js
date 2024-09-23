@@ -1,7 +1,7 @@
 const Appointment = require('../models/appointmentModel');
 
 // Book a new appointment
-exports.bookAppointment = async (req, res) => {
+exports.createAppointment = async (req, res) => {
     const { patientName, doctorId, appointmentDate, problemDescription, symptoms } = req.body;
     const appointment = new Appointment({
         patientName,

@@ -2,18 +2,35 @@ const User = require('../models/userModel');
 const jwt = require('jsonwebtoken');
 const bcryptjs = require('bcryptjs');
 const sendEmail = require('../utils/emailService');
-    
+const Otp = require('../models/OtpModel')
+const dotenv = require('dotenv');
+dotenv.config();
+
+
 // Register a new user
 exports.register = async (req, res) => {
-    const { email, password , fullName , role } = req.body;
+    const { email } = req.body;
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // OTP valid for 10 minutes
-    // const encPassword =  await bcryptjs.hash(password, 10);
     try {
-        const user = new User({ email, password , fullName , role, otp, otpExpires, isVerified: false });
-        await user.save();
+        // Check if the email already exists in the User model
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({ message: 'Email already exists. Please try logging in.' });
+        }
         await sendEmail(email, 'Your OTP Code', `Your OTP code is ${otp}. It is valid for 10 minutes.`);
-        res.status(201).send('User registered. Please check your email for the OTP.');
+        // Check if the email already exists in the OTP model
+        const existingOtpEntry = await Otp.findOne({ email });
+        if (existingOtpEntry) {
+            // If it exists, update the OTP and expiration time
+            existingOtpEntry.otp = otp;
+            existingOtpEntry.expires = otpExpires;
+            await existingOtpEntry.save();
+        } else {
+            // If it doesn't exist, create a new entry
+            await Otp.create({ email, otp, expires: otpExpires });
+        }
+        res.status(201).send('Please check your email for the OTP.');
     } catch (err) {
         res.status(400).json({ message: err.message });
     }
@@ -21,22 +38,19 @@ exports.register = async (req, res) => {
 
 
 exports.verifyOtp = async (req, res) => {
-    const { email, otp } = req.body;
+    const { email, otp , fullName ,password, role } = req.body;
     try {
-        const user = await User.findOne({ email });
-        if (!user || user.otp !== otp) {
+        const otpEntry = await Otp.findOne({ email });
+        if (!otpEntry || otpEntry.otp !== otp) {
            return res.status(400).json({ error: 'Invalid OTP' });
         }
 
-        if (new Date() > user.otpExpires) {
+        if (new Date() > otpEntry.expires) {
             return res.status(400).json('OTP has expired');
         }
-
-        // Clear OTP fields after successful verification
-        user.isVerified = true;
-        user.otp = undefined;
-        user.otpExpires = undefined;
+        const user = new User({ email, encPassword: await bcryptjs.hash(password, 10), fullName, role });
         await user.save();
+        await Otp.deleteOne({ email });
 
         res.status(200).json({ message: 'OTP verified successfully!' });
     } catch (error) {
@@ -51,11 +65,29 @@ exports.login = async (req, res) => {
     const { email, password } = req.body;
     try {
         const user = await User.findOne({ email });
-        if (!user || !(await bcryptjs.compare( password, user.password))) {
+        if (!user || !(await bcryptjs.compare( password, user.encPassword))) {
             return res.status(401).json({ message: 'Invalid credentials' });
         }
-        const token = jwt.sign({ id: user._id }, 'your_jwt_secret', { expiresIn: '1h' });
+        const token = jwt.sign({ id: user._id }, process.env.YOUR_JWT_SECRET, { expiresIn: '24h' });
         res.json({ token });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
+exports.user = async (req, res) => {
+    try {
+        const userId = req.user.id; // Get the user ID from the token
+        const user1 = await User.findById(userId).select('-encPassword'); // Exclude password from response
+        if (!user1) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        console.log(req,req.user._id, req.user.email);
+        res.json({
+            id: req.user._id,
+            email: req.user.email,
+            fullName: req.user.fullName,
+            
+        });
     } catch (err) {
         res.status(500).json({ message: err.message });
     }

@@ -42,10 +42,7 @@ router.get('/', doctorController.getAllDoctors);
  *       400:
  *         description: Bad request
  */
-router.post('/', doctorController.createDoctor , (req, res)=>{
-    
-    res.send(console.log('Doctor created successfully'));
-});
+router.post('/', doctorController.createDoctor);
 
 /**
  * @swagger

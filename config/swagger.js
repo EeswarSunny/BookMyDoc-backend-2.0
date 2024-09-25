@@ -23,5 +23,4 @@ const swaggerOptions = {
   },
   apis: ['./routes/v1/*.js', './routes/v2/*.js'], // Path to the API docs
 };
-console.log(`${process.env.PORT_FRONTEND}`);
 module.exports = { swaggerOptions };

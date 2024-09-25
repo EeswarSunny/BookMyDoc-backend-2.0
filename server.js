@@ -7,8 +7,7 @@ const swaggerJsDoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 const connectDB = require('./config/mongo');
 const { swaggerOptions } = require('./config/swagger'); // Swagger options
-const routesV1 = require('./routes/v2'); // Modularized routes
-const routesV2 = require('./routes/v2'); // Modularized routes
+const routesV1 = require('./routes/v1'); // Modularized routes
 // Load environment variables
 dotenv.config();
 
@@ -36,7 +35,7 @@ app.use(cors({
 // Rate limiter configuration
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
+  max: 1000, // Limit each IP to 100 requests per windowMs
   message: "Too many requests from this IP, please try again later."
 });
 
@@ -52,7 +51,6 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 // Use routes
 app.use('/api/v1', routesV1);
-// app.use('/api/v2', routesV2);
 
 // Centralized error handling middleware
 app.use((err, req, res, next) => {

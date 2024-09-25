@@ -29,11 +29,13 @@ router.get('/', adminController.getAllAdmins);
  *           schema:
  *             type: object
  *             properties:
- *               name:
+ *               fullName:
  *                 type: string
  *               email:
  *                 type: string
  *               password:
+ *                 type: string
+ *               role:
  *                 type: string
  *     responses:
  *       201:

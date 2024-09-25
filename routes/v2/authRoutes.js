@@ -133,5 +133,7 @@ router.post('/logout', authController.logout);
  */
 router.post('/verify-otp', authController.verifyOtp);
 
+router.post('/upload', authController.upload);
+
 
 module.exports = router;

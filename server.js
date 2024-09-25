@@ -8,6 +8,7 @@ const swaggerUi = require('swagger-ui-express');
 const connectDB = require('./config/mongo');
 const { swaggerOptions } = require('./config/swagger'); // Swagger options
 const routesV1 = require('./routes/v1'); // Modularized routes
+const path = require('path');
 // Load environment variables
 dotenv.config();
 
@@ -48,7 +49,8 @@ connectDB();
 // Swagger docs setup
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
-
+// Middleware to serve static files from "uploads" folder
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // Use routes
 app.use('/api/v1', routesV1);
 

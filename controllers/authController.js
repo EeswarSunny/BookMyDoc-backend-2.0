@@ -81,7 +81,6 @@ exports.user = async (req, res) => {
         if (!user1) {
             return res.status(404).json({ message: 'User not found' });
         }
-        console.log(req,req.user._id, req.user.email);
         res.json({
             id: req.user._id,
             email: req.user.email,
@@ -96,4 +95,34 @@ exports.user = async (req, res) => {
 // Logout user (invalidate token on client side)
 exports.logout = (req, res) => { 
     res.json({ message: 'User logged out' });
+};
+
+
+// @route   POST /api/v1/uploads
+// @desc    Upload image and store it in MongoDB
+// @access  Public (or Private if necessary)
+exports.upload = async (req, res) => {
+    const { userId, image } = req.body; // Assume image is sent as a Base64 string
+
+    if (!image || !userId) {
+        return res.status(400).json({ message: 'No image or user ID provided' });
+    }
+
+    try {
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        user.profileImage = image; // Store the Base64 string in the user's profileImage field
+        await user.save();
+
+        res.status(200).json({
+            message: 'File uploaded and stored successfully!',
+            user,
+        });
+    } catch (error) {
+        console.error('Error uploading image:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
 };

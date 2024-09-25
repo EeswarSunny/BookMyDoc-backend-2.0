@@ -35,7 +35,6 @@ module.exports = {
         }
         try {
             const decoded = jwt.verify(token, process.env.YOUR_JWT_SECRET); // Replace with your actual secret
-            console.log(decoded);
             req.user = await User.findById(decoded.id); // Attach user info to request
             if (!req.user) {
                 return res.status(404).json({ message: 'User not found' });

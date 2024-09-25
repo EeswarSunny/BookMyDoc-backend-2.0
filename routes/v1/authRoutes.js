@@ -133,6 +133,6 @@ router.post('/logout', authController.logout);
  */
 router.post('/verify-otp', authController.verifyOtp);
 
-router.post('/upload', authController.upload);
+router.post('/image', authController.uploadImage);
 
 module.exports = router;

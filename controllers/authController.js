@@ -101,7 +101,7 @@ exports.logout = (req, res) => {
 // @route   POST /api/v1/uploads
 // @desc    Upload image and store it in MongoDB
 // @access  Public (or Private if necessary)
-exports.upload = async (req, res) => {
+exports.uploadImage = async (req, res) => {
     const { userId, image } = req.body; // Assume image is sent as a Base64 string
 
     if (!image || !userId) {

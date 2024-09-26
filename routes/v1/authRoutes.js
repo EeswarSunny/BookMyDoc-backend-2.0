@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const authController = require('../../controllers/authController');
-const { authenticateToken, verifyToken } = require('../../middleware/authMiddleware');
+const { verifyToken } = require('../../middleware/authMiddleware');
 // Register a new user
 /**
  * @swagger
@@ -134,5 +134,9 @@ router.post('/logout', authController.logout);
 router.post('/verify-otp', authController.verifyOtp);
 
 router.post('/image', authController.uploadImage);
+
+// In your routes file (e.g., userRoutes.js)
+router.patch('/update', authController.updateUser);
+
 
 module.exports = router;

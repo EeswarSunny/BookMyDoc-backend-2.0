@@ -81,11 +81,19 @@ exports.user = async (req, res) => {
         if (!user1) {
             return res.status(404).json({ message: 'User not found' });
         }
+
+        // Return all user details
         res.json({
-            id: req.user._id,
-            email: req.user.email,
-            fullName: req.user.fullName,
-            
+            id: user1._id, // Include the user ID
+            email: user1.email,
+            fullName: user1.fullName,
+            gender: user1.gender,
+            dateOfBirth: user1.dateOfBirth,
+            location : user1.location,
+            phone :user1.phone,
+            profileImage: user1.profileImage,
+
+            // Add more fields as necessary
         });
     } catch (err) {
         res.status(500).json({ message: err.message });
@@ -126,3 +134,39 @@ exports.uploadImage = async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 };
+
+
+// In your userController.js
+exports.updateUser = async (req, res) => {
+    try {
+      // Destructure the fields from req.body
+      const { userId, fullName, phone, gender,  location, dateOfBirth } = req.body;
+      // Build the updatedDetails object using only the fields provided in the request
+      const updatedDetails = {};
+      if (fullName) updatedDetails.fullName = fullName;
+      if (phone) updatedDetails.phone = phone;  
+      if (gender) updatedDetails.gender = gender;
+      if (location) updatedDetails.location = location;
+      if (dateOfBirth) updatedDetails.dateOfBirth = dateOfBirth;
+  
+      // Use $set to update the specified fields in the MongoDB document
+      const updatedUser = await User.findByIdAndUpdate(
+        userId,
+        { $set: updatedDetails },
+        { new: true, runValidators: true }
+      );
+  
+      // Send success response with the updated user document
+      res.status(200).json({
+        message: 'User details updated successfully',
+        user: updatedUser,
+      });
+    } catch (error) {
+      // Handle any errors that occur during the update process
+      res.status(500).json({
+        message: 'Error updating user details',
+        error: error.message,
+      });
+    }
+  };
+  

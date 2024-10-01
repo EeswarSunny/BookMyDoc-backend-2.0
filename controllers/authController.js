@@ -1,4 +1,6 @@
 const User = require('../models/userModel');
+const Doctor = require('../models/doctorModel');
+const Admin = require('../models/adminModel');
 const jwt = require('jsonwebtoken');
 const bcryptjs = require('bcryptjs');
 const sendEmail = require('../utils/emailService');
@@ -9,12 +11,19 @@ dotenv.config();
 
 // Register a new user
 exports.register = async (req, res) => {
-    const { email } = req.body;
+    const { email , role } = req.body;
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const otpExpires = new Date(Date.now() + 10 * 60 * 1000); // OTP valid for 10 minutes
     try {
         // Check if the email already exists in the User model
-        const existingUser = await User.findOne({ email });
+        let existingUser;
+        if (role === 'doctor') {
+            existingUser = await Doctor.findOne({ email });
+        } else if (role === 'admin') {
+            existingUser = await Admin.findOne({ email });
+        } else {
+            existingUser = await User.findOne({ email });
+        }
         if (existingUser) {
             return res.status(400).json({ message: 'Email already exists. Please try logging in.' });
         }
@@ -48,8 +57,16 @@ exports.verifyOtp = async (req, res) => {
         if (new Date() > otpEntry.expires) {
             return res.status(400).json('OTP has expired');
         }
-        const user = new User({ email, encPassword: await bcryptjs.hash(password, 10), fullName, role });
-        await user.save();
+        let newUser;
+        if (role === 'doctor') {
+            newUser = new Doctor({ email, encPassword: await bcryptjs.hash(password, 10), fullName, role });
+        } else if (role === 'admin') {
+            newUser = new Admin({ email, encPassword: await bcryptjs.hash(password, 10), fullName, role });
+        } else {
+            newUser = new User({ email, encPassword: await bcryptjs.hash(password, 10), fullName, role });
+        }
+
+        await newUser.save();
         await Otp.deleteOne({ email });
 
         res.status(200).json({ message: 'OTP verified successfully!' });
@@ -139,8 +156,9 @@ exports.uploadImage = async (req, res) => {
 // In your userController.js
 exports.updateUser = async (req, res) => {
     try {
-      // Destructure the fields from req.body
-      const { userId, fullName, phone, gender,  location, dateOfBirth } = req.body;
+      // Destructu
+      const { userId } = req.params; // Extract userId from URL parametersre the fields from req.body
+      const { fullName, phone, gender,  location, dateOfBirth } = req.body;
       // Build the updatedDetails object using only the fields provided in the request
       const updatedDetails = {};
       if (fullName) updatedDetails.fullName = fullName;

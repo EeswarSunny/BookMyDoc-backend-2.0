@@ -2,9 +2,8 @@ const mongoose = require('mongoose');
 const doctorSchema = new mongoose.Schema({
     email: { type: String, required: true, trim: true, unique: true, match: /.+\@.+\..+/  },
     fullName: { type: String, required: true, trim: true, unique: true },
-    password: { type: String, required: true },
-    otp: { type: String }, // Field to store OTP
-    otpExpires: { type: Date },
+    encPassword: { type: String, required: true },
+
     role: { type: String, enum: ['user', 'doctor','admin'], default: 'user' } ,// Added role field
     isVerified: { type: Boolean, default: false },
     gender: { type: String, enum: ['Male', 'Female', 'Other']},
@@ -27,6 +26,3 @@ const doctorSchema = new mongoose.Schema({
 module.exports = mongoose.model('Doctor', doctorSchema);
 
 
-// , required: true
-// required: true,
-// , required: true 

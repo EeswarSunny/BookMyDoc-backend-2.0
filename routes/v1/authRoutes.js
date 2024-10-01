@@ -136,7 +136,7 @@ router.post('/verify-otp', authController.verifyOtp);
 router.post('/image', authController.uploadImage);
 
 // In your routes file (e.g., userRoutes.js)
-router.patch('/update', authController.updateUser);
+router.patch('/update/:userId', authController.updateUser);
 
 
 module.exports = router;

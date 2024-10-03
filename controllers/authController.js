@@ -8,7 +8,14 @@ const Otp = require('../models/OtpModel')
 const dotenv = require('dotenv');
 dotenv.config();
 
-
+exports.getAllUsers = async (req, res) => {
+    try {
+        const patients = await User.find(); // Populate if you have related data
+        res.json(patients);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
 // Register a new user
 exports.register = async (req, res) => {
     const { email , role } = req.body;
@@ -75,22 +82,62 @@ exports.verifyOtp = async (req, res) => {
         res.status(500).json('Server error');
     }
 };
+exports.addUser = async (req, res) => {
+    const { fullName, email, password,gender, role, phone } = req.body;
+    console.log(req.body);
+    // Create a new doctor instance using the provided data
+    const user = new User({
+        fullName,
+        email,
+        gender,
+        encPassword: await bcryptjs.hash(password, 10), 
+        role: role || 'user', // Default to 'doctor' if not provided
+        phone,
+        
+    });
 
+    try {
+        const savedUser = await user.save();
+        res.status(201).json(savedUser);
+    } catch (err) {
+        res.status(400).json({ message: err.message });
+    }
+};
 
 // Login user
 exports.login = async (req, res) => {
     const { email, password } = req.body;
     try {
+        // Check for doctors first
+        const doctor = await Doctor.findOne({ email });
+        if (doctor && await bcryptjs.compare(password, doctor.encPassword)) {
+            const token = jwt.sign({ id: doctor._id, role: 'doctor' }, process.env.YOUR_JWT_SECRET, { expiresIn: '24h' });
+            return res.json({ token, role: 'doctor' });
+        }
+
+        // Check for admin
+        const admin = await Admin.findOne({ email });
+        if (admin && await bcryptjs.compare(password, admin.encPassword)) {
+            const token = jwt.sign({ id: admin._id, role: 'admin' }, process.env.YOUR_JWT_SECRET, { expiresIn: '24h' });
+            return res.json({ token, role: 'admin' });
+        }
+
+        // Check for regular users
         const user = await User.findOne({ email });
-        if (!user || !(await bcryptjs.compare( password, user.encPassword))) {
+        if (!user || !(await bcryptjs.compare(password, user.encPassword))) {
             return res.status(401).json({ message: 'Invalid credentials' });
         }
-        const token = jwt.sign({ id: user._id }, process.env.YOUR_JWT_SECRET, { expiresIn: '24h' });
-        res.json({ token });
+
+        const token = jwt.sign({ id: user._id, role: user.isAdmin ? 'admin' : 'user' }, process.env.YOUR_JWT_SECRET, { expiresIn: '24h' });
+
+        res.json({ token, role: user.isAdmin ? 'admin' : 'user' });
     } catch (err) {
-        res.status(500).json({ message: err.message });
+        console.error('Login error:', err);
+        res.status(500).json({ message: 'Server error' });
     }
 };
+
+
 exports.user = async (req, res) => {
     try {
         const userId = req.user.id; // Get the user ID from the token

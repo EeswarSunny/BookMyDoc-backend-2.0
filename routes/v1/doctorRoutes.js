@@ -43,6 +43,8 @@ router.get('/', doctorController.getAllDoctors);
  *         description: Bad request
  */
 router.post('/', doctorController.createDoctor);
+router.post('/doctor', doctorController.addDoctor);
+router.delete('/doctor/:id', doctorController.deleteDoctor);
 
 /**
  * @swagger
@@ -81,5 +83,8 @@ router.post('/', doctorController.createDoctor);
  *         description: Internal server error
  */
 router.get('/location/:locationId', doctorController.getDoctorsByLocation);
+
+router.get('/locations', doctorController.getAllLocations);
+router.get('/dashboard', doctorController.getDoctorDashboard);
 
 module.exports = router;

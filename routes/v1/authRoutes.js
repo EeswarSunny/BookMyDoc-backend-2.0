@@ -32,6 +32,7 @@ const { verifyToken } = require('../../middleware/authMiddleware');
  */
 router.post('/register', authController.register);
 
+router.get('/users', authController.getAllUsers);
 
 
 // Login user
@@ -95,6 +96,7 @@ router.post('/login', authController.login);
  *         description: User not found
  */
 router.get('/user',verifyToken , authController.user);
+router.post('/user' , authController.addUser);
 
 /**
  * @swagger

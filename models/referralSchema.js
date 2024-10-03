@@ -1,3 +1,4 @@
+const mongoose = require ('mongoose')
 const referralSchema = new mongoose.Schema({
     referredToId: { type: mongoose.Schema.Types.ObjectId, ref: 'Doctor', required: true },
     referredById: { type: mongoose.Schema.Types.ObjectId, ref: 'Doctor', required: true },

@@ -1,3 +1,4 @@
+const mongoose = require ('mongoose')
 const feedbackSchema = new mongoose.Schema({
     doctorId: { type: mongoose.Schema.Types.ObjectId, ref: 'Doctor', required: true },
     patientId: { type: mongoose.Schema.Types.ObjectId, ref: 'Patient', required: true },

@@ -28,12 +28,14 @@ exports.addDoctor = async (req, res) => {
         isVerified: isVerified || false, // Default to false if not provided
         phoneNumber,
         experience,
+        rating,
     });
 
     try {
         const savedDoctor = await doctor.save();
         res.status(201).json(savedDoctor);
     } catch (err) {
+        console.error(err); // Log the entire error for debugging
         res.status(400).json({ message: err.message });
     }
 };

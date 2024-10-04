@@ -1,4 +1,4 @@
-const Admin = require('../models/userModel'); // Adjust the path to your Admin model
+const Admin = require('../models/adminModel'); // Adjust the path to your Admin model
 
 /**
  * Get all admins
@@ -14,7 +14,33 @@ exports.getAllAdmins = async (req, res) => {
         return res.status(500).json({ message: 'Internal server error' }); // Handle any errors
     }
 };
-
+exports.admin = async (req, res) => {
+    try {
+        const adminId = req.admin.id; // Get the user ID from the token
+        const admin1 = await Admin.findById(adminId).select('-encPassword'); // Exclude password from response
+        if (!admin1) {
+            return res.status(404).json({ message: 'Admin not found' });
+        }
+        
+        // Return all user details
+        res.json({
+            id: admin1._id, // Include the user ID
+            email: admin1.email,
+            fullName: admin1.fullName,
+            gender: admin1.gender,
+            dateOfBirth: admin1.dateOfBirth,
+            location : admin1.location,
+            phone :admin1.phone,
+            profileImage: admin1.profileImage,
+            
+            // Add more fields as necessary
+        });
+        
+    } catch (err) {
+        console.error(err); // Log the entire error for debugging
+        res.status(500).json({ message: err.message });
+    }
+};
 /**
  * Create a new admin
  * @param {Object} req - The request object
@@ -39,3 +65,40 @@ exports.createAdmin = async (req, res) => {
         return res.status(500).json({ message: 'Internal server error' }); // Handle any errors
     }
 };
+
+exports.logout = (req, res) => { 
+    res.json({ message: 'Admin logged out' });
+};
+
+exports.updateAdmin = async (req, res) => {
+    try {
+      const { adminId } = req.params; // Extract userId from URL parameters the fields from req.body
+      const { fullName, phone, gender,  location, dateOfBirth } = req.body;
+      // Build the updatedDetails object using only the fields provided in the request
+      const updatedDetails = {};
+      if (fullName) updatedDetails.fullName = fullName;
+      if (phone) updatedDetails.phone = phone;  
+      if (gender) updatedDetails.gender = gender;
+      if (location) updatedDetails.location = location;
+      if (dateOfBirth) updatedDetails.dateOfBirth = dateOfBirth;
+  
+      // Use $set to update the specified fields in the MongoDB document
+      const updatedAdmin = await Admin.findByIdAndUpdate(
+        adminId,
+        { $set: updatedDetails },
+        { new: true, runValidators: true }
+      );
+  
+      // Send success response with the updated user document
+      res.status(200).json({
+        message: 'admin details updated successfully',
+        user: updatedAdmin,
+      });
+    } catch (error) {
+      // Handle any errors that occur during the update process
+      res.status(500).json({
+        message: 'Error updating admin details',
+        error: error.message,
+      });
+    }
+  };

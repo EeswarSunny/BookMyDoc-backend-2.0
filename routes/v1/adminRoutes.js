@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const adminController = require('../../controllers/adminController');
+const { verifyTokenAdmin } = require('../../middleware/authMiddleware');
 
 /**
  * @swagger
@@ -15,6 +16,14 @@ const adminController = require('../../controllers/adminController');
  *         description: Internal server error
  */
 router.get('/', adminController.getAllAdmins);
+router.get('/admin1' ,verifyTokenAdmin, adminController.admin);
+
+// router.post('/image', adminController.uploadImage);
+
+// In your routes file (e.g., userRoutes.js)
+router.patch('/update/:adminId', adminController.updateAdmin);
+
+router.post('/logout', adminController.logout);
 
 /**
  * @swagger

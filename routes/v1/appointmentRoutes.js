@@ -18,6 +18,8 @@ const appointmentController = require('../../controllers/appointmentController')
  */
 router.get('/', appointmentController.getAllAppointments);
 
+router.get('/timeslots', appointmentController.timeslots);
+
 /**
  * @swagger
  * /api/v1/appointments:

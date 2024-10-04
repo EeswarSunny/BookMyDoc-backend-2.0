@@ -104,6 +104,23 @@ exports.addUser = async (req, res) => {
     }
 };
 
+exports.deleteUser = async (req, res) => {
+    const { id } = req.params; // Get the ID from the request parameters
+
+    try {
+        const deletedUser = await User.findByIdAndDelete(id);
+
+        if (!deletedUser) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        res.status(200).json({ message: 'User deleted successfully', deletedUser });
+    } catch (err) {
+        console.error(err); // Log the entire error for debugging
+        res.status(500).json({ message: err.message });
+    }
+};
+
 // Login user
 exports.login = async (req, res) => {
     const { email, password } = req.body;
@@ -203,8 +220,8 @@ exports.uploadImage = async (req, res) => {
 // In your userController.js
 exports.updateUser = async (req, res) => {
     try {
-      // Destructu
-      const { userId } = req.params; // Extract userId from URL parametersre the fields from req.body
+      // Destructure
+      const { userId } = req.params; // Extract userId from URL parameters are the fields from req.body
       const { fullName, phone, gender,  location, dateOfBirth } = req.body;
       // Build the updatedDetails object using only the fields provided in the request
       const updatedDetails = {};

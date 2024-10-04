@@ -97,6 +97,7 @@ router.post('/login', authController.login);
  */
 router.get('/user',verifyToken , authController.user);
 router.post('/user' , authController.addUser);
+router.delete('/user/:id' , authController.deleteUser);
 
 /**
  * @swagger

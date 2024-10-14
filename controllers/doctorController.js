@@ -5,9 +5,11 @@ const bcryptjs = require('bcryptjs');
 // Get all doctors
 exports.getAllDoctors = async (req, res) => {
     try {
-        const doctors = await Doctor.find()
+        const doctors = await Doctor.find({ rating: { $gte: 4.5 } })
         .populate('specializations')
-        .populate('locationId');
+        .populate('locationId')
+        .sort({ rating: -1 })
+        .limit(10);
         res.json(doctors);
     } catch (err) {
         res.status(500).json({ message: err.message });

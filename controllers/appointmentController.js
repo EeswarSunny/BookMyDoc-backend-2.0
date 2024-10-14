@@ -4,7 +4,6 @@ const Availability = require('../models/availabilitySchema');
 // Book a new appointment
 exports.createAppointment = async (req, res) => {
     const { doctorId, userId, date, timeSlot, problem, symptoms , locationId } = req.body;
-console.log(req.body);
     // Validate the input
     if (!doctorId || !userId || !date || !timeSlot || !problem || !symptoms) {
         return res.status(400).json({ message: 'All fields are required' });
@@ -59,16 +58,23 @@ console.log(req.body);
 
 // Get all appointments for a user
 exports.getAllAppointments = async (req, res) => {
+    const { patientId } = req.params;
     try {
-        const appointments = await Appointment.find().populate('doctorId');
+        const appointments = await Appointment.find({ patientId })
+        .populate('doctorId', 'fullName gender experience rating') // Include fields you want from the Doctor model
+        .populate('locationId', 'cityName hospitalName  pincode address'); // Include fields you want from the Location model
+        console.log(appointments , "ghrt");
         res.json(appointments);
-    } catch (err) {
-        res.status(500).json({ message: err.message });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Failed to fetch appointments' });
     }
 };
 
 exports.timeslots = async (req, res) => {
+    console.log("hiisfwef");
     const { date, doctorId } = req.query;
+    console.log(date , doctorId , "fgd");
     // Check if required parameters are present
     if (!date || !doctorId) {
         return res.status(400).json({ message: 'Date and doctor ID are required' });
@@ -77,7 +83,7 @@ exports.timeslots = async (req, res) => {
     try {
         // Convert date string to a Date object and log it
         const availabilityDate = new Date(date); 
-
+console.log(availabilityDate);
         // Fetch availability based on doctor and date
         const availability = await Availability.findOne({
             doctorId: doctorId,

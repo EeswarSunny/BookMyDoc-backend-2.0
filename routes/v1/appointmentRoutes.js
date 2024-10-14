@@ -16,9 +16,9 @@ const appointmentController = require('../../controllers/appointmentController')
  *       500:
  *         description: Internal server error
  */
-router.get('/', appointmentController.getAllAppointments);
-
+router.get('/patient/:patientId', appointmentController.getAllAppointments);
 router.get('/timeslots', appointmentController.timeslots);
+
 
 /**
  * @swagger

@@ -120,8 +120,8 @@ exports.createDoctor = async (req, res) => {
     }
 };
 
-exports.getDoctorDashboard = async (req, res) => {
-    const doctorId = req.user.id; // Assuming you have a middleware that sets req.user
+exports.getDoctorDashboard = async (req, res) => {1
+    const doctorId = req.id; // Assuming you have a middleware that sets req.user
     try {
         const doctor = await Doctor.findById(doctorId)
             .populate('specializations')

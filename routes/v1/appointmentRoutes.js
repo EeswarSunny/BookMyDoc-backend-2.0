@@ -18,11 +18,12 @@ const appointmentController = require('../../controllers/appointmentController')
  */
 router.get('/patient/:patientId', appointmentController.getAllAppointments);
 router.get('/timeslots', appointmentController.timeslots);
+router.get('/check', appointmentController.check);
 
 
 /**
  * @swagger
- * /api/v1/appointments:
+ * /api/v1/appointments/book:
  *   post:
  *     summary: Create a new appointment
  *     tags: [Appointment]
@@ -47,7 +48,7 @@ router.get('/timeslots', appointmentController.timeslots);
  *       400:
  *         description: Bad request
  */
-router.post('/', appointmentController.createAppointment);
+router.post('/book', appointmentController.createAppointment);
 
 /**
  * @swagger
@@ -106,7 +107,7 @@ router.put('/:id', appointmentController.editAppointment);
  *       404:
  *         description: Appointment not found
  */
-router.delete('/:id', appointmentController.cancelAppointment);
+router.patch('/:appointmentId', appointmentController.cancelAppointment);
 
 module.exports = router;
 

@@ -102,3 +102,28 @@ exports.updateAdmin = async (req, res) => {
       });
     }
   };
+  exports.uploadImage = async (req, res) => {
+    const { userId, image } = req.body; // Assume image is sent as a Base64 string
+
+    if (!image || !userId) {
+        return res.status(400).json({ message: 'No image or user ID provided' });
+    }
+
+    try {
+        const user = await Admin.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        user.profileImage = image; // Store the Base64 string in the user's profileImage field
+        await user.save();
+
+        res.status(200).json({
+            message: 'File uploaded and stored successfully!',
+            user,
+        });
+    } catch (error) {
+        console.error('Error uploading image:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};

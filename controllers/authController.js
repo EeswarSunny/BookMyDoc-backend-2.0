@@ -91,7 +91,7 @@ exports.addUser = async (req, res) => {
         email,
         gender,
         encPassword: await bcryptjs.hash(password, 10), 
-        role: role || 'user', // Default to 'doctor' if not provided
+        role: role || 'user', // Default to 'user' if not provided
         phone,
         
     });
@@ -100,6 +100,7 @@ exports.addUser = async (req, res) => {
         const savedUser = await user.save();
         res.status(201).json(savedUser);
     } catch (err) {
+        console.error( err);
         res.status(400).json({ message: err.message });
     }
 };

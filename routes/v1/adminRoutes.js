@@ -24,6 +24,7 @@ router.get('/admin1' ,verifyTokenAdmin, adminController.admin);
 router.patch('/update/:adminId', adminController.updateAdmin);
 
 router.post('/logout', adminController.logout);
+router.post('/image', adminController.uploadImage);
 
 /**
  * @swagger

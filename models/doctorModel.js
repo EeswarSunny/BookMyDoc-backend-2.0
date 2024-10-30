@@ -6,6 +6,7 @@ const Availability = require('./availabilitySchema');
 const doctorSchema = new mongoose.Schema({
     email: { type: String, required: true, trim: true, unique: true, match: /.+\@.+\..+/  },
     fullName: { type: String, required: true, trim: true, unique: true },
+    profileImage: { type: String },
     encPassword: { type: String, required: true },
     role: { type: String, enum: ['user', 'doctor'], default: 'doctor' } ,// Added role field
     isVerified: { type: Boolean, default: false },

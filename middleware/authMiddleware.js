@@ -3,6 +3,7 @@ const Admin = require('../models/adminModel');
 const jwt = require('jsonwebtoken')
 const util = require('util')
 const dotenv = require('dotenv');
+const Doctor = require('../models/doctorModel');
 dotenv.config();
 
 module.exports = {
@@ -58,6 +59,22 @@ module.exports = {
             req.admin = await Admin.findById(decoded.id); // Attach user info to request
             if (!req.admin) {
                 return res.status(404).json({ message: 'Admin not found' });
+            }
+            next(); // Proceed to the next middleware or route handler
+        } catch (err) {
+            return res.status(401).json( err.message);
+        }
+    },
+    verifyTokenDoctor : async (req, res, next) => {
+        const token = req.headers['authorization']?.split(' ')[1]; // Extract token from Authorization header
+        if (!token) {
+            return res.status(401).json({ message: 'No token provided'});
+        }
+        try {
+            const decoded = jwt.verify(token, process.env.YOUR_JWT_SECRET); // Replace with your actual secret
+            req.doctor = await Doctor.findById(decoded.id); // Attach user info to request
+            if (!req.doctor) {
+                return res.status(404).json({ message: 'Doctor not found' });
             }
             next(); // Proceed to the next middleware or route handler
         } catch (err) {

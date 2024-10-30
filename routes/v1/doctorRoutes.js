@@ -2,6 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const doctorController = require('../../controllers/doctorController');
+const { verifyToken, verifyTokenDoctor } = require('../../middleware/authMiddleware');
 
 /**
  * @swagger
@@ -83,8 +84,9 @@ router.delete('/doctor/:id', doctorController.deleteDoctor);
  *         description: Internal server error
  */
 router.get('/location/:locationId', doctorController.getDoctorsByLocation);
-
+router.get('/doctor1' ,verifyTokenDoctor, doctorController.doctor);
 router.get('/locations', doctorController.getAllLocations);
-router.get('/dashboard', doctorController.getDoctorDashboard);
+router.get('/dashboard',verifyTokenDoctor , doctorController.getDoctorDashboard);
+router.post('/image', doctorController.uploadImage);
 
 module.exports = router;

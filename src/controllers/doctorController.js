@@ -160,6 +160,7 @@ exports.getDoctorDashboard = async (req, res) => {1
         if (!doctor) {
             return res.status(404).json({ message: 'Doctor not found.' });
         }
+        console.log(doctor);
         res.json(doctor);
     } catch (err) {
         console.error('Error fetching doctor dashboard:', err);

@@ -1,10 +1,12 @@
 const Appointment = require('../models/appointmentModel');
 const Availability = require('../models/availabilitySchema');
+const logger = require('../utils/logger');
 // Book a new appointment
 exports.createAppointment = async (req, res) => {
-    const { doctorId, userId, date, slotId, problem, symptoms , locationId } = req.body;
+    const { doctorId, userId, date, slotId, slotTime, problem, symptoms , locationId } = req.body;
     // Validate the input
-    if (!doctorId || !userId || !date || !slotId || !problem || !symptoms) {
+    if (!doctorId || !userId || !date || !slotId || !slotTime || !problem || !symptoms) {
+        logger.info('All fields are required');
         return res.status(400).json({ message: 'All fields are required' });
     }
     try {
@@ -14,6 +16,7 @@ exports.createAppointment = async (req, res) => {
             patientId : userId , // Ensure you pass the user ID
             appointmentDate : date,
             slotId,
+            startTime :slotTime,
             reason : problem,
             symptoms,
             locationId,

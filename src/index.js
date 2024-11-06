@@ -10,32 +10,39 @@ const routesV1 = require("./routes/v1"); // Modularized routes
 const path = require("path");
 const logger = require("./utils/logger");
 const morgan = require("morgan");
+const helmet = require("helmet");  // for secure HTTP headers
 
 
 const morganFormat = ":method :url :status :response-time ms";
 // Load environment variables
 dotenv.config();
 
-// Initialize app
-const app = express();
-
 const { PORT, MONGO_URI_LOCAL, EMAIL, PORT_FRONTEND } = process.env;
 // Check required environment variables
 const requiredEnvVars = ["PORT", "MONGO_URI_LOCAL", "EMAIL", "PORT_FRONTEND"]; // Add other required variables
 requiredEnvVars.forEach((varName) => {
-  if (!process.env[varName]) {
-    throw new Error(`Missing required environment variable: ${varName}`);
-  }
+    if (!process.env[varName]) {
+        throw new Error(`Missing required environment variable: ${varName}`);
+    }
 });
 
+// Initialize app
+const app = express();
+
 // Middleware
+app.use(helmet());  // Set secure HTTP headers with helmet
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// CORS setup with origin restriction
 app.use(
     cors({
-        origin: `http://localhost:${PORT_FRONTEND}`,
+      origin: `http://localhost:${PORT_FRONTEND}`,
+      methods: ['GET', 'POST', 'PUT', 'DELETE'], // Restrict methods if needed
+      credentials: true,
     })
-);
+  );
+
 app.use(
   morgan(morganFormat, {
     stream: {

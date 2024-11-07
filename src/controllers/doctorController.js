@@ -1,6 +1,7 @@
 const Doctor = require('../models/doctorModel');
 const Location = require('../models/locationModel');
 const bcryptjs = require('bcryptjs');
+const logger = require('../utils/logger');
 
 exports.doctor = async (req, res) => {
     try {
@@ -96,7 +97,8 @@ exports.getDoctorsByLocation = async (req, res) => {
     }
 
     try {
-        const doctors = await Doctor.find({ locationId: locationId }).populate('specializations');
+        const doctors = await Doctor.find({ locationId: locationId }).populate('specializations').populate('locationId');
+        logger.info(doctors);
         res.json(doctors);
     } catch (err) {
         console.error('Error fetching doctors:', err);

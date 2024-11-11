@@ -2,64 +2,13 @@ const express = require('express');
 const router = express.Router();
 const authController = require('../../controllers/authController');
 const { verifyToken } = require('../../middleware/authMiddleware');
-// Register a new user
-/**
- * @swagger
- * /api/v1/auth/register:
- *   post:
- *     summary: Register a new user
- *     tags: [Auth]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               email:
- *                 type: string
- *               password:
- *                 type: string
- *               fullName:
- *                 type: string
- *               role:
- *                 type: string
- *     responses:
- *       201:
- *         description: User registered successfully
- *       400:
- *         description: Invalid input
- */
-router.post('/register', authController.register);
+const { loginLimiter, generalLimiter } = require('../../utils/rateLimiters');
+
 
 router.get('/users', authController.getAllUsers);
 
 
-// Login user
-/**
- * @swagger
- * /api/v1/auth/login:
- *   post:
- *     summary: Login a user
- *     tags: [Auth]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               email:
- *                 type: string
- *               password:
- *                 type: string
- *     responses:
- *       200:
- *         description: User logged in successfully
- *       401:
- *         description: Unauthorized
- */
-router.post('/login', authController.login);
+
 // Get user details
 /**
  * @swagger
@@ -113,28 +62,7 @@ router.delete('/user/:id' , authController.deleteUser);
  *         description: Unauthorized, user is not logged in
  */
 router.post('/logout', authController.logout);
-/**
- * @swagger
- * /api/v1/auth/verify-otp:
- *   post:
- *     summary: Verify OTP for a user
- *     tags: [Auth]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               otp:
- *                 type: string
- *     responses:
- *       200:
- *         description: OTP verified successfully
- *       400:
- *         description: Invalid OTP
- */
-router.post('/verify-otp', authController.verifyOtp);
+
 
 router.post('/image', authController.uploadImage);
 

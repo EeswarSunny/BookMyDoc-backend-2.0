@@ -17,6 +17,25 @@ module.exports = {
             next();
         });
     },
+    isAuthenticated : async (req, res, next) => {
+        const token = req.headers["authorization"]?.split(" ")[1]; // Extract token from Authorization header
+      
+        if (!token) {
+          req.isAuthenticated = () => false; // Set to false if no token provided
+          return next();
+        }
+      
+        try {
+          // Verify token with secret key
+          const decoded = jwt.verify(token, process.env.YOUR_JWT_SECRET);
+          req.isAuthenticated = () => true; // Set to true if token is valid
+          req.userId = decoded.id; // Optionally attach user ID from token to request
+          next();
+        } catch (err) {
+          req.isAuthenticated = () => false; // Set to false if token verification fails
+          next();
+        }
+      },
 
     authorizeAdmin: async (req, res, next) => {
         try {

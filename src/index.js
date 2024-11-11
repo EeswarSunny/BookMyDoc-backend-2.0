@@ -11,20 +11,24 @@ const path = require("path");
 const logger = require("./utils/logger");
 const morgan = require("morgan");
 const helmet = require("helmet");  // for secure HTTP headers
-
+const Joi = require('joi');
+const { isAuthenticated } = require("./middleware/authMiddleware");
 
 const morganFormat = ":method :url :status :response-time ms";
 // Load environment variables
 dotenv.config();
 
-const { PORT, MONGO_URI_LOCAL, EMAIL, PORT_FRONTEND } = process.env;
-// Check required environment variables
-const requiredEnvVars = ["PORT", "MONGO_URI_LOCAL", "EMAIL", "PORT_FRONTEND"]; // Add other required variables
-requiredEnvVars.forEach((varName) => {
-    if (!process.env[varName]) {
-        throw new Error(`Missing required environment variable: ${varName}`);
-    }
-});
+const envSchema = Joi.object({
+    PORT: Joi.number().required(),
+    MONGO_URI_LOCAL: Joi.string().uri().required(),
+    EMAIL: Joi.string().email().required(),
+    PORT_FRONTEND: Joi.number().required()
+}).unknown().required();
+
+const { error } = envSchema.validate(process.env);
+if (error) {
+    throw new Error(`Environment variable validation error: ${error.message}`);
+}
 
 // Initialize app
 const app = express();
@@ -32,16 +36,17 @@ const app = express();
 // Middleware
 app.use(helmet());  // Set secure HTTP headers with helmet
 app.use(express.json());
+app.use(isAuthenticated);
 app.use(express.urlencoded({ extended: true }));
 
-// CORS setup with origin restriction
-app.use(
-    cors({
-      origin: `http://localhost:${PORT_FRONTEND}`,
-      methods: ['GET', 'POST', 'PUT', 'DELETE'], // Restrict methods if needed
-      credentials: true,
-    })
-  );
+// Improved CORS with regex pattern for production
+const corsOptions = {
+    origin: new RegExp(`^http://localhost:${process.env.PORT_FRONTEND}$`), // Development regex
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true
+};
+
+app.use(cors(corsOptions));
 
 app.use(
   morgan(morganFormat, {
@@ -62,15 +67,15 @@ app.use(
     },
   })
 );
-// Rate limiter configuration
-const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
-  message: "Too many requests from this IP, please try again later.",
-});
+// // Rate limiter configuration
+// const apiLimiter = rateLimit({
+//   windowMs: 15 * 60 * 1000, // 15 minutes
+//   max: 100, // Limit each IP to 100 requests per windowMs
+//   message: "Too many requests from this IP, please try again later.",
+// });
 
 // Apply rate limiter to all API routes
-app.use("/api/", apiLimiter);
+// app.use("/api/", apiLimiter);
 
 // Connect to MongoDB
 connectDB();
@@ -93,8 +98,8 @@ app.use((err, req, res, next) => {
 });
 
 // Start the server
-const server = app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+const server = app.listen(process.env.PORT, () => {
+  console.log(`Server is running on port ${process.env.PORT}`);
 });
 
 // Graceful shutdown

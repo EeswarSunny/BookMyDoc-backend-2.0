@@ -7,6 +7,8 @@ const uploadRoutes = require('./uploadRoutes');
 const { dynamicLimiter } = require('../../utils/rateLimiters');
 const router = express.Router();
 const publicRoutes = require("./publicRoutes.js");
+const testRoutes = require('./testRoutes');
+
 
 // Define routes
 router.use('/admin', dynamicLimiter , adminRoutes);
@@ -15,5 +17,6 @@ router.use('/public', publicRoutes);
 router.use('/doctors',dynamicLimiter, doctorRoutes);
 router.use('/appointments',dynamicLimiter , appointmentRoutes);
 router.use('/uploads',dynamicLimiter,  uploadRoutes);
+router.use('/test', testRoutes);
 
 module.exports = router;

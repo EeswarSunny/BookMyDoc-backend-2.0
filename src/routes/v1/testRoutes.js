@@ -3,15 +3,16 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/v1/test:
+ * /test:
  *   get:
  *     summary: Test endpoint
  *     responses:
  *       200:
- *         description: Success
+ *         description: A successful response
  */
-router.get('/test', (req, res) => {
-  res.json({ message: 'Test endpoint works!' });
-});
-
-module.exports = router;
+router.get("/test", (req, res) => {
+    res.send("Test endpoint works!");
+  });
+  
+  module.exports = router;
+  

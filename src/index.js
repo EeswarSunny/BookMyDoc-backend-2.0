@@ -1,7 +1,6 @@
 const express = require("express");
 const dotenv = require("dotenv");
 const cors = require("cors");
-const rateLimit = require("express-rate-limit");
 const swaggerJsDoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
 const connectDB = require("./config/mongo");
@@ -13,6 +12,8 @@ const morgan = require("morgan");
 const helmet = require("helmet");  // for secure HTTP headers
 const Joi = require('joi');
 const { isAuthenticated } = require("./middleware/authMiddleware");
+const errorHandler = require("./utils/errorHandler");
+
 
 const morganFormat = ":method :url :status :response-time ms";
 // Load environment variables
@@ -82,29 +83,48 @@ connectDB();
 
 // Swagger docs setup
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 // Middleware to serve static files from "uploads" folder
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
 // Use routes
 app.use("/api/v1", routesV1);
 
-// Centralized error handling middleware
-app.use((err, req, res, next) => {
-  console.error(err.stack); // Log the error
-  res.status(err.status || 500).json({
-    success: false,
-    message: err.message || "Internal Server Error",
+// Centralized error handling middleware for API route errors
+app.use(async (err, req, res, next) => {
+    try {
+
+      logger.error(err.stack);
+      
+      await errorHandler.handleError(err, res);
+    } catch (handlerError) {
+      logger.error("Error in error handler:", handlerError);
+      res.status(500).json({
+        success: false,
+        message: "Internal Server Error",
+      });
+    }
   });
-});
+
+  // Global error handling for uncaught exceptions and unhandled promise rejections
+process.on("uncaughtException", (error) => {
+    logger.error("Uncaught exception:", error);
+    errorHandler.handleError(error);  // Handle uncaught errors gracefully
+  });
+  
+  process.on("unhandledRejection", (reason) => {
+    logger.error("Unhandled rejection:", reason);
+    errorHandler.handleError(reason);  // Handle unhandled promise rejections
+  });
 
 // Start the server
 const server = app.listen(process.env.PORT, () => {
-  console.log(`Server is running on port ${process.env.PORT}`);
+  logger.info(`Server is running on port ${process.env.PORT}`);
 });
 
 // Graceful shutdown
 process.on("SIGTERM", () => {
   server.close(() => {
-    console.log("Server closed");
+    logger.info("Server closed");
   });
 });

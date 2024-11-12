@@ -1,11 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const authController = require('../../controllers/authController');
+const userController = require('../../controllers/userController');
 const { verifyToken } = require('../../middleware/authMiddleware');
-const { loginLimiter, generalLimiter } = require('../../utils/rateLimiters');
 
 
-router.get('/users', authController.getAllUsers);
+router.get('/users', userController.getAllUsers);
 
 
 
@@ -44,9 +43,11 @@ router.get('/users', authController.getAllUsers);
  *       404:
  *         description: User not found
  */
-router.get('/user',verifyToken , authController.user);
-router.post('/user' , authController.addUser);
-router.delete('/user/:id' , authController.deleteUser);
+router.get('/user',verifyToken , userController.user);
+
+router.post('/user' , userController.addUser);
+
+router.delete('/user/:id' , userController.deleteUser);
 
 /**
  * @swagger
@@ -61,13 +62,11 @@ router.delete('/user/:id' , authController.deleteUser);
  *       401:
  *         description: Unauthorized, user is not logged in
  */
-router.post('/logout', authController.logout);
+router.post('/logout', userController.logout);
 
+router.post('/image', userController.uploadImage);
 
-router.post('/image', authController.uploadImage);
-
-// In your routes file (e.g., userRoutes.js)
-router.patch('/update/:userId', authController.updateUser);
+router.patch('/update/:userId', userController.updateUser);
 
 
 module.exports = router;

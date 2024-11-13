@@ -4,7 +4,9 @@ require('dotenv').config();
 module.exports.handleError = async (err, res) => {
 
   logger.error(err.stack || err.message);
-
+//   await sendMailToAdminIfCritical(); 
+//   await saveInOpsQueueIfCritical();
+//   await determineIfOperationalError();
   const statusCode = err.status || 500;
   const message = err.message || "Internal Server Error";
   
@@ -14,3 +16,5 @@ module.exports.handleError = async (err, res) => {
     ...(process.env.NODE_ENV === "development" && { stack: err.stack }), // Include stack trace in development
   });
 };
+
+//  add isoperational  into it

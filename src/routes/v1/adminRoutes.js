@@ -17,11 +17,12 @@ const { verifyTokenAdmin } = require('../../middleware/authMiddleware');
  */
 router.get('/', adminController.getAllAdmins);
 router.get('/admin1' ,verifyTokenAdmin, adminController.admin);
-
+router.get('/users', adminController.getAllUsers);
 // router.post('/image', adminController.uploadImage);
 
 // In your routes file (e.g., userRoutes.js)
 router.patch('/update/:adminId', adminController.updateAdmin);
+router.delete('/user/:id' , adminController.deleteUser);
 
 router.post('/logout', adminController.logout);
 router.post('/image', adminController.uploadImage);

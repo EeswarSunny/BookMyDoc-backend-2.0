@@ -4,19 +4,19 @@ const doctorRoutes = require('./doctorRoutes');
 const appointmentRoutes = require('./appointmentRoutes');
 const authRoutes = require('./authRoutes');
 const uploadRoutes = require('./uploadRoutes');
-const { dynamicLimiter } = require('../../utils/rateLimiters');
-const router = express.Router();
+const { dynamicLimiter } = require('../../middleware/rateLimiters.js');
 const publicRoutes = require("./publicRoutes.js");
-const testRoutes = require('./testRoutes');
+const { isAuthenticated, isAdmin, allowAdminOrDoctor, verifyToken } = require('../../middleware/authMiddleware.js');
+const router = express.Router();
 
 
-// Define routes
-router.use('/admin', dynamicLimiter , adminRoutes);
-router.use('/auth', authRoutes);
 router.use('/public', publicRoutes);
-router.use('/doctors',dynamicLimiter, doctorRoutes);
-router.use('/appointments',dynamicLimiter , appointmentRoutes);
-router.use('/uploads',dynamicLimiter,  uploadRoutes);
-router.use('/test', testRoutes);
+
+router.use('/auth', verifyToken, isAuthenticated , authRoutes);
+router.use('/admin', verifyToken, isAuthenticated, isAdmin, dynamicLimiter,  adminRoutes);
+router.use('/doctors', verifyToken, isAuthenticated, allowAdminOrDoctor, dynamicLimiter, doctorRoutes);
+router.use('/appointments', verifyToken, isAuthenticated, dynamicLimiter,  appointmentRoutes);
+
+router.use('/uploads', verifyToken, dynamicLimiter,  uploadRoutes);
 
 module.exports = router;

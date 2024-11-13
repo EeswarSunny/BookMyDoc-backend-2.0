@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const authController = require('../../controllers/authController');
-const { generalLimiter, loginLimiter } = require("../../utils/rateLimiters");
+const userController = require('../../controllers/userController');
+const { generalLimiter, loginLimiter } = require("../../middleware/rateLimiters");
 
 /**
  * @swagger
@@ -31,7 +31,7 @@ const { generalLimiter, loginLimiter } = require("../../utils/rateLimiters");
  *       400:
  *         description: Email already exists or invalid request data.
  */
-router.post('/register', generalLimiter, authController.register);
+router.post('/register', generalLimiter, userController.register);
 
 /**
  * @swagger
@@ -84,7 +84,7 @@ router.post('/register', generalLimiter, authController.register);
  *       500:
  *         description: Server error.
  */
-router.post('/login', loginLimiter, authController.login);
+router.post('/login', loginLimiter, userController.login);
 
 /**
  * @swagger
@@ -144,7 +144,7 @@ router.post('/login', loginLimiter, authController.login);
  *       500:
  *         description: Server error.
  */
-router.post('/verify-otp', authController.verifyOtp);
+router.post('/verify-otp', userController.verifyOtp);
 
 
 module.exports = router;

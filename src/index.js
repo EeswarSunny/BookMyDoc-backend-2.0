@@ -36,7 +36,7 @@ const app = express();
 
 // Middleware
 app.use(helmet());  // Set secure HTTP headers with helmet
-app.use(express.json());
+app.use(express.json({ limit: '300kb' }));
 app.use(isAuthenticated);
 app.use(express.urlencoded({ extended: true }));
 
@@ -68,15 +68,6 @@ app.use(
     },
   })
 );
-// // Rate limiter configuration
-// const apiLimiter = rateLimit({
-//   windowMs: 15 * 60 * 1000, // 15 minutes
-//   max: 100, // Limit each IP to 100 requests per windowMs
-//   message: "Too many requests from this IP, please try again later.",
-// });
-
-// Apply rate limiter to all API routes
-// app.use("/api/", apiLimiter);
 
 // Connect to MongoDB
 connectDB();
@@ -84,6 +75,7 @@ connectDB();
 // Swagger docs setup
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+
 // Middleware to serve static files from "uploads" folder
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
@@ -91,40 +83,42 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/api/v1", routesV1);
 
 // Centralized error handling middleware for API route errors
-app.use(async (err, req, res, next) => {
+app.use(async (err, req, res) => {
     try {
-
       logger.error(err.stack);
-      
       await errorHandler.handleError(err, res);
     } catch (handlerError) {
       logger.error("Error in error handler:", handlerError);
       res.status(500).json({
         success: false,
-        message: "Internal Server Error",
+        message: "Something went wrong. Please try again later. Internal Server Error",
       });
     }
   });
 
-  // Global error handling for uncaught exceptions and unhandled promise rejections
+// Global error handling for uncaught exceptions and unhandled promise rejections
 process.on("uncaughtException", (error) => {
     logger.error("Uncaught exception:", error);
     errorHandler.handleError(error);  // Handle uncaught errors gracefully
+    process.exit(1);
   });
   
-  process.on("unhandledRejection", (reason) => {
+//  empty JSON body to all POST requests results in crash
+process.on("unhandledRejection", (reason) => {
     logger.error("Unhandled rejection:", reason);
     errorHandler.handleError(reason);  // Handle unhandled promise rejections
-  });
+    process.exit(1);
+});
 
 // Start the server
 const server = app.listen(process.env.PORT, () => {
-  logger.info(`Server is running on port ${process.env.PORT}`);
+    logger.info(`Server is running on port ${process.env.PORT}`);
 });
 
 // Graceful shutdown
 process.on("SIGTERM", () => {
-  server.close(() => {
-    logger.info("Server closed");
-  });
+    server.close(() => {
+        logger.info("Server closed");
+        process.exit(0);
+    });
 });

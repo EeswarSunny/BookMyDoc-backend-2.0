@@ -1,106 +1,73 @@
 const User = require('../models/userModel');
 const Admin = require('../models/adminModel');
-const jwt = require('jsonwebtoken')
-const util = require('util')
+const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
-const Doctor = require('../models/doctorModel');
 dotenv.config();
 
-module.exports = {
-    authenticateToken: (req, res, next) => {
-        const token = req.headers['authorization'];
-        if (!token) return res.status(401).json({ message: 'No token provided' });
-        jwt.verify(token, process.env.YOUR_JWT_SECRET, (err, decoded) => {
-            if (err) return res.status(500).json({ message: 'Failed to authenticate token' });
-            req.userId = decoded.id;
-            console.log("decode ", decoded);
-            next();
-        });
-    },
-    isAuthenticated : async (req, res, next) => {
-        const token = req.headers["authorization"]?.split(" ")[1]; // Extract token from Authorization header
-      
-        if (!token) {
-          req.isAuthenticated = () => false; // Set to false if no token provided
-          return next();
-        }
-      
-        try {
-          // Verify token with secret key
-          const decoded = jwt.verify(token, process.env.YOUR_JWT_SECRET);
-          req.isAuthenticated = () => true; // Set to true if token is valid
-          req.userId = decoded.id; // Optionally attach user ID from token to request
-          next();
-        } catch (err) {
-          req.isAuthenticated = () => false; // Set to false if token verification fails
-          next();
-        }
-      },
+const isAuthenticated = async (req, res, next) => {
+    const token = req.headers["authorization"]?.split(" ")[1]; 
 
-    authorizeAdmin: async (req, res, next) => {
-        try {
-            const user = await User.findById(req.userId);
-            if (user.role !== 'admin') {
-                return res.status(403).json({ message: 'Access denied' });
-            }
-            next();
-        } catch (err) {
-            res.status(500).json({ message: err.message });
-        }
-    },
+    if (!token) {
+      req.isAuthenticated = () => false; 
+      return next();
+    }
 
-    verifyToken : async (req, res, next) => {
-        const token = req.headers['authorization']?.split(' ')[1]; // Extract token from Authorization header
-        if (!token) {
-            return res.status(401).json({ message: 'No token provided'});
-        }
-        try {
-            const decoded = jwt.verify(token, process.env.YOUR_JWT_SECRET); // Replace with your actual secret
-            req.user = await User.findById(decoded.id); // Attach user info to request
-            if (!req.user) {
-                return res.status(404).json({ message: 'User not found' });
-            }
-            next(); // Proceed to the next middleware or route handler
-        } catch (err) {
-            if (err.name === 'TokenExpiredError') {
-                return res.status(401).json({ message: 'Token has expired' });
-            }
-            return res.status(401).json({ message: 'Invalid token' });
-        }
-    },
-    verifyTokenAdmin : async (req, res, next) => {
-        const token = req.headers['authorization']?.split(' ')[1]; // Extract token from Authorization header
-        if (!token) {
-            return res.status(401).json({ message: 'No token provided'});
-        }
-        try {
-            const decoded = jwt.verify(token, process.env.YOUR_JWT_SECRET); // Replace with your actual secret
-            req.admin = await Admin.findById(decoded.id); // Attach user info to request
-            if (!req.admin) {
-                return res.status(404).json({ message: 'Admin not found' });
-            }
-            next(); // Proceed to the next middleware or route handler
-        } catch (err) {
-            return res.status(401).json( err.message);
-        }
-    },
-    verifyTokenDoctor : async (req, res, next) => {
-        const token = req.headers['authorization']?.split(' ')[1]; // Extract token from Authorization header
-        if (!token) {
-            return res.status(401).json({ message: 'No token provided'});
-        }
-        try {
-            const decoded = jwt.verify(token, process.env.YOUR_JWT_SECRET); // Replace with your actual secret
-            req.doctor = await Doctor.findById(decoded.id); // Attach user info to request
-            if (!req.doctor) {
-                return res.status(404).json({ message: 'Doctor not found' });
-            }
-            next(); // Proceed to the next middleware or route handler
-        } catch (err) {
-            if (err.name === 'TokenExpiredError') {
-                return res.status(401).json({ message: 'Token expired' });
-            }
-            return res.status(401).json({ message: err.message });
-        }
-    },
+    try {
+      // Verify token with secret key
+      const decoded = jwt.verify(token, process.env.YOUR_JWT_SECRET);
+      req.isAuthenticated = () => true;
+      req.user = decoded; 
+    } catch (err) {
+      req.isAuthenticated = () => false; 
+      next();
+    }
 };
+const verifyToken = async (req, res, next) => {
+    const token = req.headers['authorization']?.split(' ')[1]; // Extract token from Authorization header
+    if (!token) {
+        return res.status(401).json({ message: 'No token provided' });
+    }
+    try {
+        const decoded = jwt.verify(token, process.env.YOUR_JWT_SECRET);
+        req.user = decoded;
+        if (!req.user.id) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        next(); // Proceed to the next middleware or route handler
+    } catch (err) {
+        if (err.name === 'TokenExpiredError') {
+            return res.status(401).json({ message: 'Token has expired' });
+        }
+        return res.status(401).json({ message: 'Invalid token' });
+    }
+};
+
+const authorizeAdmin = async (req, res, next) => {
+    try {
+        const user = await Admin.findById(req.user.id);
+        if (user.role !== 'admin') {
+            return res.status(403).json({ message: 'Access denied' });
+        }
+        next();
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
+
+
+const isAdmin = async (req, res, next) => {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Forbidden: You do not have admin rights' });
+    }
+    next();
+};
+
+const allowAdminOrDoctor = (req, res, next) => {
+    if (req.user.role !== 'admin' && req.user.role !== 'doctor') {
+      return res.status(403).json({ message: 'Forbidden: You do not have the required role' });
+    }
+    next();
+  };
+  
+
+module.exports = {isAuthenticated, authorizeAdmin, verifyToken, isAdmin, allowAdminOrDoctor };

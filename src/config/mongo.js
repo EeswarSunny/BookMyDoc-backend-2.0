@@ -1,9 +1,9 @@
 const pino = require("pino");
 const logger = require("../utils/logger")
-const logger2 = pino();
-// /config/db.js
 const mongoose = require('mongoose');
 
+// /config/db.js
+const logger2 = pino();
 
 const connectDB = async () => {
   try {

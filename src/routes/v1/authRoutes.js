@@ -1,12 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const userController = require('../../controllers/userController');
+const authController = require('../../controllers/authController');
 const { verifyToken } = require('../../middleware/authMiddleware');
-
-
-router.get('/users', userController.getAllUsers);
-
-
 
 // Get user details
 /**
@@ -43,11 +38,10 @@ router.get('/users', userController.getAllUsers);
  *       404:
  *         description: User not found
  */
-router.get('/user',verifyToken , userController.user);
+router.get('/user',verifyToken , authController.user);
 
-router.post('/user' , userController.addUser);
+router.post('/user' , authController.addUser);
 
-router.delete('/user/:id' , userController.deleteUser);
 
 /**
  * @swagger
@@ -62,11 +56,11 @@ router.delete('/user/:id' , userController.deleteUser);
  *       401:
  *         description: Unauthorized, user is not logged in
  */
-router.post('/logout', userController.logout);
+router.post('/logout', authController.logout);
 
-router.post('/image', userController.uploadImage);
+router.post('/image', authController.uploadImage);
 
-router.patch('/update/:userId', userController.updateUser);
+router.patch('/update/:userId', authController.updateUser);
 
 
 module.exports = router;

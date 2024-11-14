@@ -1,10 +1,5 @@
 const User = require('../models/userModel');
-const Doctor = require('../models/doctorModel');
-const Admin = require('../models/adminModel');
-const jwt = require('jsonwebtoken');
 const bcryptjs = require('bcryptjs');
-const sendEmail = require('../utils/emailService');
-const Otp = require('../models/OtpModel')
 const dotenv = require('dotenv');
 dotenv.config();
 
@@ -67,7 +62,7 @@ exports.uploadImage = async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        user.profileImage = image; // Store the Base64 string in the user's profileImage field
+        user.profileImage = image; 
         await user.save();
 
         res.status(200).json({

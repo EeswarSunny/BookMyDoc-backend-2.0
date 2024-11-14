@@ -1,9 +1,6 @@
 const dotenv = require('dotenv');
-const { validateLogin } = require('../validators/');
-const { loginUser } = require('../services/authService');
-const { validateRegistration } = require('../validators/userValidator');
-const { validateOtpVerification } = require('../validators/otpValidator');
-const { verifyOtpAndCreateUser } = require('../services/otpService');
+const { validateRegistration, validateLogin, validateOtpVerification } = require('../validators/userValidator');
+const { generateOtp, verifyOtpAndCreateUser, loginUser } = require('../services/userService');
 dotenv.config();
 
 exports.register = async (req, res) => {
@@ -37,8 +34,7 @@ exports.verifyOtp = async (req, res) => {
         // Step 2: Call the service to verify OTP and create a user
         const newUser = await verifyOtpAndCreateUser(email, otp, fullName, password, role);
 
-        // Step 3: Send success response
-        res.status(200).json({ message: 'OTP verified successfully!', user: newUser });
+        res.status(200).json({ message: 'OTP verified successfully! , login now'});
     } catch (error) {
         console.error('OTP verification error:', error);
         res.status(500).json({ message: error.message });

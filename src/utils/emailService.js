@@ -1,6 +1,6 @@
 const nodemailer = require('nodemailer');
 
-const sendEmail = async (email, subject, text) => {
+const sendEmail = async (email , subject , text ) => {
   // Create a transporter using Gmail
   const transporter = nodemailer.createTransport({
     service: 'gmail', // or your email service
@@ -12,9 +12,9 @@ const sendEmail = async (email, subject, text) => {
 
   const mailOptions = {
     from: 'polunandeeswar341@gmail.com', // sender address
-    to: email, // list of receivers
-    subject: subject, // Subject line
-    text: text, // plain text body
+    to: email, 
+    subject: subject, 
+    text: text, 
   };
 
   try {

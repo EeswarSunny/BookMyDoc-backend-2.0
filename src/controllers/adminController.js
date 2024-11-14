@@ -1,19 +1,36 @@
-const Admin = require('../models/adminModel'); // Adjust the path to your Admin model
+const Admin = require('../models/adminModel'); 
+const adminService = require('../services/adminService');
 
-/**
- * Get all admins
- * @param {Object} req - The request object
- * @param {Object} res - The response object
- */
+
 exports.getAllAdmins = async (req, res) => {
     try {
-        const admins = await Admin.find({ role: 'admin' }); // Retrieve all admins from the database
-        return res.status(200).json(admins); // Send back the list of admins
+        const admins = await adminService.getAllAdmins(); // Call the service to get admins
+        return res.status(200).json(admins); 
     } catch (error) {
         console.error('Error retrieving admins:', error);
-        return res.status(500).json({ message: 'Internal server error' }); // Handle any errors
+        return res.status(500).json({ message: 'Internal server error' }); 
     }
 };
+
+// exports.getAllUsers = async (req, res) => {
+//     try {
+//         const { page = 1, limit = 10 } = req.query;
+//         const result = await adminService.getAllUsers(page, limit);
+// console.log(result)
+//         return res.status(200).json({
+//             users: result.users,
+//             totalUsers: result.totalUsers,
+//             totalPages: result.totalPages,
+//             currentPage: result.currentPage,
+//             pageSize: result.pageSize,
+//         });
+//     } catch (error) {
+//         console.error('Error retrieving users:', error);
+//         return res.status(500).json({ message: 'Internal server error' });
+//     }
+// };
+
+
 exports.admin = async (req, res) => {
     try {
         const adminId = req.admin.id; // Get the user ID from the token
@@ -41,11 +58,7 @@ exports.admin = async (req, res) => {
         res.status(500).json({ message: err.message });
     }
 };
-/**
- * Create a new admin
- * @param {Object} req - The request object
- * @param {Object} res - The response object
- */
+
 exports.createAdmin = async (req, res) => {
     const { email, password , fullName , role } = req.body;
 
@@ -102,6 +115,7 @@ exports.updateAdmin = async (req, res) => {
       });
     }
   };
+
   exports.uploadImage = async (req, res) => {
     const { userId, image } = req.body; // Assume image is sent as a Base64 string
 
@@ -129,14 +143,6 @@ exports.updateAdmin = async (req, res) => {
 };
 
 
-exports.getAllUsers = async (req, res) => {
-    try {
-        const patients = await User.find(); // Populate if you have related data
-        res.json(patients);
-    } catch (err) {
-        res.status(500).json({ message: err.message });
-    }
-};
 
 exports.deleteUser = async (req, res) => {
     const { id } = req.params; // Get the ID from the request parameters

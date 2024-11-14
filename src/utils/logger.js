@@ -24,10 +24,10 @@ const logger = createLogger({
       format: consoleLogFormat,
     }),
 
-    new transports.File({ filename: "app.log" })  //file path should be masked
+    new transports.File({ filename: 'app.log' })  
     ],
     exceptionHandlers: [
-        new transports.File({ filename: 'exceptions.log' })  // Handle uncaught exceptions and log them to a file
+        new transports.File({ filename: 'exceptions.log' }) 
       ]
        
 });

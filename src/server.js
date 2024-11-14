@@ -4,8 +4,8 @@ const cors = require("cors");
 const swaggerJsDoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
 const connectDB = require("./config/mongo");
-const { swaggerOptions } = require("./config/swagger"); // Swagger options
-const routesV1 = require("./routes/v1"); // Modularized routes
+const { swaggerOptions } = require("./config/swagger"); 
+const routesV1 = require("./routes/v1");
 const path = require("path");
 const logger = require("./utils/logger");
 const morgan = require("morgan");
@@ -13,12 +13,9 @@ const helmet = require("helmet");  // for secure HTTP headers
 const Joi = require('joi');
 const { isAuthenticated } = require("./middleware/authMiddleware");
 const errorHandler = require("./utils/errorHandler");
-
-
 const morganFormat = ":method :url :status :response-time ms";
 // Load environment variables
 dotenv.config();
-
 const envSchema = Joi.object({
     PORT: Joi.number().required(),
     MONGO_URI_LOCAL: Joi.string().uri().required(),
@@ -35,7 +32,7 @@ if (error) {
 const app = express();
 
 // Middleware
-app.use(helmet());  // Set secure HTTP headers with helmet
+app.use(helmet()); 
 app.use(express.json({ limit: '300kb' }));
 app.use(isAuthenticated);
 app.use(express.urlencoded({ extended: true }));
@@ -50,23 +47,23 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 app.use(
-  morgan(morganFormat, {
-    stream: {
-      write: (message) => {
-        const logObject = {
-          method: message.split(" ")[0],
-
-          url: message.split(" ")[1],
-
-          status: message.split(" ")[2],
-
-          responseTime: message.split(" ")[3],
+    morgan(morganFormat, {
+        stream: {
+            write: (message) => {
+                const logObject = {
+                    method: message.split(" ")[0],
+                    
+                    url: message.split(" ")[1],
+                    
+                    status: message.split(" ")[2],
+                    
+                    responseTime: message.split(" ")[3],
         };
-
+        
         logger.info(JSON.stringify(logObject));
-      },
     },
-  })
+},
+})
 );
 
 // Connect to MongoDB

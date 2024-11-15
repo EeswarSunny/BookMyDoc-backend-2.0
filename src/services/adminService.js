@@ -4,7 +4,7 @@ const User = require('../models/userModel');
 
 const getAllAdmins = async () => {
     try {
-        const admins = await Admin.find({ role: 'admin' }); 
+        const admins = await Admin.find({ role: 'admin' }).select('-profileImage -encPassword');
         return admins; 
     } catch (error) {
         throw new Error('Error fetching admins: ' + error.message);

@@ -5,7 +5,6 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const verifyToken = async (req, res, next) => {
-    console.log(1);
     const token = req.headers['authorization']?.split(' ')[1];
     if (!token) {
         return res.status(401).json({ message: 'No token provided' });
@@ -26,17 +25,11 @@ const verifyToken = async (req, res, next) => {
 };
 
 const isAuthenticated = async (req, res, next) => {
-    console.log(2);
-
     const token = req.headers["authorization"]?.split(" ")[1]; 
-    console.log(2);
-
     if (!token) {
       req.isAuthenticated = () => false; 
       return next();
     }
-    console.log(2);
-
     try {
       const decoded = jwt.verify(token, process.env.YOUR_JWT_SECRET);
       req.isAuthenticated = () => true;
@@ -48,25 +41,19 @@ const isAuthenticated = async (req, res, next) => {
     }
 };
 
-
-// const authorizeAdmin = async (req, res, next) => {
-//     console.log(4);
-
-//     try {
-//         const user = await Admin.findById(req.user.id);
-//         if (user.role !== 'admin') {
-//             return res.status(403).json({ message: 'Access denied' });
-//         }
-//         next();
-//     } catch (err) {
-//         res.status(500).json({ message: err.message });
-//     }
-// };
-
+const authorizeAdmin = async (req, res, next) => {
+    try {
+        const user = await Admin.findById(req.user.id);
+        if (user.role !== 'admin') {
+            return res.status(403).json({ message: 'Access denied' });
+        }
+        next();
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};
 
 const isAdmin = async (req, res, next) => {
-    console.log(3);
-
     if (req.user.role !== 'admin') {
       return res.status(403).json({ message: 'Forbidden: You do not have admin rights' });
     }
@@ -81,4 +68,4 @@ const allowAdminOrDoctor = (req, res, next) => {
   };
   
 
-module.exports = {isAuthenticated, verifyToken, isAdmin, allowAdminOrDoctor };
+module.exports = {isAuthenticated, verifyToken, isAdmin, allowAdminOrDoctor , authorizeAdmin };

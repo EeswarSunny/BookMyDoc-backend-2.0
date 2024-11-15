@@ -12,23 +12,23 @@ exports.getAllAdmins = async (req, res) => {
     }
 };
 
-// exports.getAllUsers = async (req, res) => {
-//     try {
-//         const { page = 1, limit = 10 } = req.query;
-//         const result = await adminService.getAllUsers(page, limit);
-// console.log(result)
-//         return res.status(200).json({
-//             users: result.users,
-//             totalUsers: result.totalUsers,
-//             totalPages: result.totalPages,
-//             currentPage: result.currentPage,
-//             pageSize: result.pageSize,
-//         });
-//     } catch (error) {
-//         console.error('Error retrieving users:', error);
-//         return res.status(500).json({ message: 'Internal server error' });
-//     }
-// };
+exports.getAllUsers = async (req, res) => {
+    try {
+        const { page = 1, limit = 10 } = req.query;
+        const result = await adminService.getAllUsers(page, limit);
+console.log(result)
+        return res.status(200).json({
+            users: result.users,
+            totalUsers: result.totalUsers,
+            totalPages: result.totalPages,
+            currentPage: result.currentPage,
+            pageSize: result.pageSize,
+        });
+    } catch (error) {
+        console.error('Error retrieving users:', error);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+};
 
 
 exports.admin = async (req, res) => {

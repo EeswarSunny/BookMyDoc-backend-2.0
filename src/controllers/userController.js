@@ -5,12 +5,15 @@ dotenv.config();
 
 exports.register = async (req, res) => {
     const { email, role } = req.body;
-
+console.log(role);
     // Validate input data using Joi
     const validationErrors = validateRegistration(req.body);
+    console.log("fhgfe");
     if (validationErrors) {
-        return res.status(400).json({ message: validationErrors.join(', ') });
+        return res.status(400).json({ message: validationErrors.join(', ')+"egwegwe" });
     }
+
+    console.log("14r");
     try {
         // Call the service to generate OTP and handle user registration logic
         await generateOtp(email, role);

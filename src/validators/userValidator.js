@@ -5,7 +5,7 @@ const validateRegistration = (data) => {
     // Escape input data to prevent HTML injections
     data.email = validator.escape(data.email);
     data.role = validator.escape(data.role);
-
+    console.log(data);
     const schema = Joi.object({
         email: Joi.string().email().required().trim().messages({
             'string.email': 'Please provide a valid email.',
@@ -15,7 +15,7 @@ const validateRegistration = (data) => {
             'any.required': 'Role is required.',
             'string.valid': 'Role must be one of the following: admin, doctor, or user.'
         }),
-    });
+    }).unknown(true);
 
     const { error } = schema.validate(data);
 
